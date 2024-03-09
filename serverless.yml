@@ -1,0 +1,69 @@
+service: CRUD
+frameworkVersion: "3"
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+    reloadHandler: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  environment:
+    MONGODB_URI: mongodb://localhost:27017/serverless
+
+functions:
+  auth:
+    handler: auth.handler
+
+  create:
+    handler: handler.create
+    events:
+      - http:
+          path: /notes
+          method: post
+          authorizer:
+            name: auth
+            type: request
+            resultTtlInSeconds: 0
+          cors: true
+
+  get:
+    handler: handler.get
+    events:
+      - http:
+          path: /notes
+          method: get
+          authorizer:
+            name: auth
+            type: request
+            resultTtlInSeconds: 0
+          cors: true
+
+  update:
+    handler: handler.update
+    events:
+      - http:
+          path: /notes/{id}
+          method: put
+          authorizer:
+            name: auth
+            type: request
+            resultTtlInSeconds: 0
+          cors: true
+
+  delete:
+    handler: handler.delete
+    events:
+      - http:
+          path: /notes/{id}
+          method: delete
+          authorizer:
+            name: auth
+            type: request
+            resultTtlInSeconds: 0
+          cors: true
+
+plugins:
+  - serverless-offline
