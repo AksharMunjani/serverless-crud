@@ -11,59 +11,10 @@ provider:
   runtime: nodejs18.x
   region: ap-south-1
   environment:
-    MONGODB_URI: mongodb://localhost:27017/serverless
+    MONGODB_URI: ${file(env.json):MONGODB_URI}
 
 functions:
-  auth:
-    handler: auth.handler
-
-  create:
-    handler: handler.create
-    events:
-      - http:
-          path: /notes
-          method: post
-          authorizer:
-            name: auth
-            type: request
-            resultTtlInSeconds: 0
-          cors: true
-
-  get:
-    handler: handler.get
-    events:
-      - http:
-          path: /notes
-          method: get
-          authorizer:
-            name: auth
-            type: request
-            resultTtlInSeconds: 0
-          cors: true
-
-  update:
-    handler: handler.update
-    events:
-      - http:
-          path: /notes/{id}
-          method: put
-          authorizer:
-            name: auth
-            type: request
-            resultTtlInSeconds: 0
-          cors: true
-
-  delete:
-    handler: handler.delete
-    events:
-      - http:
-          path: /notes/{id}
-          method: delete
-          authorizer:
-            name: auth
-            type: request
-            resultTtlInSeconds: 0
-          cors: true
+  - ${file(routes/note.yml)}
 
 plugins:
   - serverless-offline

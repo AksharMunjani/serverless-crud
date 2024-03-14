@@ -1,0 +1,50 @@
+auth:
+  handler: controllers/auth.auth
+
+create:
+  handler: controllers/note.create
+  events:
+    - http:
+        path: /notes
+        method: post
+        authorizer:
+          name: auth
+          type: request
+          resultTtlInSeconds: 0
+        cors: true
+
+get:
+  handler: controllers/note.get
+  events:
+    - http:
+        path: /notes
+        method: get
+        authorizer:
+          name: auth
+          type: request
+          resultTtlInSeconds: 0
+        cors: true
+
+update:
+  handler: controllers/note.update
+  events:
+    - http:
+        path: /notes/{id}
+        method: put
+        authorizer:
+          name: auth
+          type: request
+          resultTtlInSeconds: 0
+        cors: true
+
+delete:
+  handler: controllers/note.delete
+  events:
+    - http:
+        path: /notes/{id}
+        method: delete
+        authorizer:
+          name: auth
+          type: request
+          resultTtlInSeconds: 0
+        cors: true

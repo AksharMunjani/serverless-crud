@@ -1,31 +1,16 @@
-const mongoose = require("mongoose");
-
-// Define your MongoDB schema and model
-const NoteSchema = new mongoose.Schema({
-  title: String,
-  content: String,
-});
-
-const Note = mongoose.model("Note", NoteSchema);
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
-
-// Helper function to create a response object with CORS headers
-const createResponse = (statusCode, body) => {
-  return {
-    statusCode,
-    headers: {
-      "Access-Control-Allow-Origin": "*", // Allow requests from any origin
-      "Access-Control-Allow-Credentials": true,
-    },
-    body: JSON.stringify(body),
-  };
-};
+const { Note } = require("../db");
+const connect = require("../db/connect");
+const noteService = require("../services/note");
+const { createResponse } = require("../utils/commonFunction");
 
 // Create a new note
 module.exports.create = async (event) => {
   try {
+    try {
+      await connect();
+    } catch (error) {
+      console.log("Database connection error: ", error);
+    }
     const data = JSON.parse(event.body);
     const newNote = new Note({
       title: data.title,
@@ -34,6 +19,7 @@ module.exports.create = async (event) => {
     await newNote.save();
     return createResponse(200, { message: "Note created successfully" });
   } catch (error) {
+    console.log("🚀 ~ module.exports.create= ~ error:", error);
     return createResponse(500, { error: "Internal Server Error" });
   }
 };
@@ -41,9 +27,15 @@ module.exports.create = async (event) => {
 // Get all notes
 module.exports.get = async (event) => {
   try {
+        try {
+      await connect();
+    } catch (error) {
+      console.log("Database connection error: ", error);
+    }
     const notes = await Note.find();
     return createResponse(200, notes);
   } catch (error) {
+    console.log("🚀 ~ module.exports.get= ~ error:", error);
     return createResponse(500, { error: "Internal Server Error" });
   }
 };
@@ -51,11 +43,17 @@ module.exports.get = async (event) => {
 // Update a note by ID
 module.exports.update = async (event) => {
   try {
+        try {
+      await connect();
+    } catch (error) {
+      console.log("Database connection error: ", error);
+    }
     const { id } = event.pathParameters;
     const data = JSON.parse(event.body);
     await Note.findByIdAndUpdate(id, data);
     return createResponse(200, { message: "Note updated successfully" });
   } catch (error) {
+    console.log("🚀 ~ module.exports.update= ~ error:", error);
     return createResponse(500, { error: "Internal Server Error" });
   }
 };
@@ -63,6 +61,11 @@ module.exports.update = async (event) => {
 // Delete a note by ID
 module.exports.delete = async (event) => {
   try {
+        try {
+      await connect();
+    } catch (error) {
+      console.log("Database connection error: ", error);
+    }
     const { id } = event.pathParameters;
     const deletedNote = await Note.findByIdAndDelete(id);
     if (!deletedNote) {
@@ -70,23 +73,7 @@ module.exports.delete = async (event) => {
     }
     return createResponse(200, { message: "Note deleted successfully" });
   } catch (error) {
+    console.log("🚀 ~ module.exports.delete ~ error:", error);
     return createResponse(500, { error: "Internal Server Error" });
   }
-};
-
-// Add a closing curly brace '}' to properly close the auth function
-module.exports.auth = async (event) => {
-  return {
-    principalId: "test",
-    policyDocument: {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Action: "execute-api:Invoke",
-          Effect: "Allow",
-          Resource: "*"
-        }
-      ]
-    }
-  };
 };
